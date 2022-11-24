@@ -1,1 +1,5 @@
 query
+colouredmug
+distantmug
+mugandbowl
+desk

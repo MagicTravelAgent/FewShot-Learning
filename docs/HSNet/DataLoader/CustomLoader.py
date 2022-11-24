@@ -27,7 +27,8 @@ class DatasetCustom(Dataset):
 
 
     def __len__(self):
-        return 1
+        return 20 # can set this for more to get different support images for each query
+                                # there is a modulo later to allow for this
 
     def __getitem__(self, idx):
         # getting an item means you can enumerate through it
@@ -39,6 +40,7 @@ class DatasetCustom(Dataset):
         query_img, query_cmask, support_imgs, support_cmasks, org_qry_imsize = self.load_frame(query_name, support_names)
 
         query_img = self.transform(query_img)
+
         if not self.use_original_imgsize:
             query_cmask = F.interpolate(query_cmask.unsqueeze(0).unsqueeze(0).float(), query_img.size()[-2:], mode='nearest').squeeze()
         query_mask, query_ignore_idx = self.extract_ignore_idx(query_cmask.float())
@@ -102,6 +104,7 @@ class DatasetCustom(Dataset):
 
     def sample_episode(self, idx):
         query_name = self.querys[idx]
+        sup_choices = self.supports.copy()
 
         support_names = []
 
@@ -111,7 +114,8 @@ class DatasetCustom(Dataset):
         #     if len(support_names) == self.shot: break
 
         for i in range(self.shot):
-          support_name = np.random.choice(self.supports, 1, replace=False)[0]
+          support_name = np.random.choice(sup_choices, 1, replace=False)[0]
+          sup_choices.remove(support_name)
           support_names.append(support_name)
 
         return query_name, support_names

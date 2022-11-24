@@ -36,9 +36,8 @@ def test(model, dataloader, nshot):
             Visualizer.visualize_prediction_batch(batch['support_imgs'], batch['support_masks'],
                                                   batch['query_img'], batch['query_mask'],
                                                   pred_mask, idx, iou_b = iou)
-        ious.append(iou)
-        
-    return np.array(Utils.to_cpu(ious[0])).mean()
+        ious.append(iou[0].float().item())
+    return np.array(ious).mean()
 
 
 if __name__ == '__main__':
@@ -49,13 +48,11 @@ if __name__ == '__main__':
     # Arguments parsing
     args = {
       "datapath": 'docs/Data/',
-      "benchmark": 'custom', # choices=['pascal', 'coco', 'fss']
-      "logpath": '',
+      "benchmark": 'custom', # dataloader selection
       "bsz": 1,
       "lr": 1e-3,
       "nworker": 0,
       "load": "docs/HSNet/Model/res101_pas/res101_pas_fold0/best_model.pt",
-      "fold": 5, # choices=[0, 1, 2, 3],
       "nshot": 1,
       "backbone": 'resnet101', # choices=['vgg16', 'resnet50', 'resnet101']
       "visualize": True,
