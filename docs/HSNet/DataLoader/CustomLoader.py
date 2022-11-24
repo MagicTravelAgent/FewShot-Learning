@@ -27,7 +27,7 @@ class DatasetCustom(Dataset):
 
 
     def __len__(self):
-        return 20 # can set this for more to get different support images for each query
+        return 30 # can set this for more to get different support images for each query
                                 # there is a modulo later to allow for this
 
     def __getitem__(self, idx):
@@ -113,10 +113,12 @@ class DatasetCustom(Dataset):
         #     if query_name != support_name: support_names.append(support_name)
         #     if len(support_names) == self.shot: break
 
-        for i in range(self.shot):
+        while len(support_names) != self.shot:
           support_name = np.random.choice(sup_choices, 1, replace=False)[0]
-          sup_choices.remove(support_name)
-          support_names.append(support_name)
+
+          if query_name != support_name: 
+            support_names.append(support_name)
+            sup_choices.remove(support_name)
 
         return query_name, support_names
 

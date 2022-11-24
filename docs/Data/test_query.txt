@@ -1,5 +1,1 @@
-query
-colouredmug
-distantmug
-mugandbowl
-desk
+topleft
