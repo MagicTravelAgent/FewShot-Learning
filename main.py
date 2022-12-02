@@ -52,7 +52,7 @@ if __name__ == '__main__':
       "bsz": 1,
       "lr": 1e-3,
       "nworker": 0,
-      "load": "docs/HSNet/Model/res101_pas/res101_pas_fold0/best_model.pt",
+      "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
       "nshot": 1,
       "backbone": 'resnet101', # choices=['vgg16', 'resnet50', 'resnet101']
       "visualize": True,
