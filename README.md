@@ -14,3 +14,6 @@ Multi-Similarity and Attention Guidance
 
 ## [LSeg](docs\Pages\LSeg.html)
 Language-driven Semantic Segmentation
+
+# Business use cases
+make the moneyyy
