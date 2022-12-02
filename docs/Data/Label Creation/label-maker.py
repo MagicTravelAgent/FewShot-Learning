@@ -17,7 +17,7 @@ name_dict = {}
 support = [] # not all images have people and they should be excluded from the support set
 
 # open each file in turn
-for index, image_name in tqdm(enumerate(name_list[:3])):
+for index, image_name in tqdm(enumerate(name_list)):
 
     # open the image to select the people
     im = Image.open(image_name)
@@ -38,7 +38,7 @@ for index, image_name in tqdm(enumerate(name_list[:3])):
 
     # save the masks in a new location
     im=im.convert("1")
-    im.save(annotation_loc+str(index)+'.png')
+    im.save(annotation_loc+"persons/"+str(index)+'.png')
 
     # identify the name of the image
     # print(image_name)

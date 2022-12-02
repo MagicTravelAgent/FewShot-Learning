@@ -1,0 +1,1 @@
+{"frankfurt_000000_000294_gtFine_color": 0, "frankfurt_000000_000576_gtFine_color": 1, "frankfurt_000000_001016_gtFine_color": 2}
