@@ -27,7 +27,7 @@ class DatasetCustom(Dataset):
 
 
     def __len__(self):
-        return 30 # can set this for more to get different support images for each query
+        return 256 # can set this for more to get different support images for each query
                                 # there is a modulo later to allow for this
 
     def __getitem__(self, idx):
@@ -88,6 +88,7 @@ class DatasetCustom(Dataset):
         query_mask = self.read_mask(query_name)
         support_imgs = [self.read_img(name) for name in support_names]
         support_masks = [self.read_mask(name) for name in support_names]
+        # print("suport mask:", torch.sum(support_masks[0].int()))
 
         org_qry_imsize = query_img.size
 
@@ -105,7 +106,8 @@ class DatasetCustom(Dataset):
     def sample_episode(self, idx):
         query_name = self.querys[idx]
         sup_choices = self.supports.copy()
-
+        # print("sup,choices")
+        # print(sup_choices)
         support_names = []
 
         # while True:  # keep sampling support set if query == support
@@ -119,6 +121,8 @@ class DatasetCustom(Dataset):
           if query_name != support_name: 
             support_names.append(support_name)
             sup_choices.remove(support_name)
+
+        # print("chosen:", support_names)
 
         return query_name, support_names
 

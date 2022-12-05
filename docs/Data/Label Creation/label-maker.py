@@ -4,21 +4,23 @@ import glob
 import json
 from tqdm import tqdm
 
-annotation_loc = "C:/Users/LPUDDIFO/OneDrive - Capgemini/Documents/Internship/Research/Datasets/Cityscapes/gtFine/val/frankfurt/"
+annotation_loc = "D:/AI/Capgemini/CityScapes/gtFine/val/frankfurt/"
 
 # Get all the file names that i need to use
 name_list = glob.glob(annotation_loc+'*.png')
 # taking the colour images of the annotations
-drop_mask = np.flatnonzero(np.core.defchararray.find(name_list, "color") != -1)
-name_list = np.take(name_list, drop_mask)
+print(name_list)
+ids = np.flatnonzero(np.core.defchararray.find(name_list,"color")!=-1)
+name_list = np.take(name_list, ids)
 
 # conversion dict
 name_dict = {}
 support = []  # not all images have people and they should be excluded from the support set
 
 # open each file in turn
-for index, image_name in tqdm(enumerate(name_list)):
+for index in tqdm(range(len(name_list))):
 
+    image_name = name_list[index]
     # open the image to select the people
     im = Image.open(image_name)
     pix = np.array(im)[:, :, :3]

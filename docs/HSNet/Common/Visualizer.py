@@ -3,6 +3,7 @@ import os
 from PIL import Image
 import numpy as np
 import torchvision.transforms as transforms
+import cv2
 
 from docs.HSNet.Common import Utils
 
@@ -89,6 +90,12 @@ class Visualizer:
     @classmethod
     def apply_mask(cls, image, mask, color, alpha=0.5):
         r""" Apply mask to the given image. """
+
+        # resizing to the correct size ((which they didnt test?))
+        mask = Image.fromarray(mask)
+        mask = mask.resize((400, 400), Image.NEAREST)
+        mask = np.array(mask)
+
         for c in range(3):
             image[:, :, c] = np.where(mask == 1,
                                       image[:, :, c] *

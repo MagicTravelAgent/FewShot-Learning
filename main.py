@@ -2,6 +2,7 @@ import torch
 import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
+from tqdm import tqdm
 
 from docs.HSNet.Model.HSNet import HypercorrSqueezeNetwork
 from docs.HSNet.Common import Utils
@@ -17,7 +18,7 @@ def test(model, dataloader, nshot):
     Utils.fix_randseed(0)
 
     ious = []
-    for idx, batch in enumerate(dataloader):
+    for idx, batch in tqdm(enumerate(dataloader)):
 
         # 1. Hypercorrelation Squeeze Networks forward pass
         batch = Utils.to_cuda(batch)
@@ -53,10 +54,10 @@ if __name__ == '__main__':
         "lr": 1e-3,
         "nworker": 0,
         "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
-        "nshot": 1,
+        "nshot": 5,
         "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
         "visualize": True,
-        "use_original_imgsize": False
+        "use_original_imgsize": True
     }
 
     # Model initialization
