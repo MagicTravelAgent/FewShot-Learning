@@ -43,12 +43,14 @@ class HypercorrSqueezeNetwork(nn.Module):
         self.cross_entropy_loss = nn.CrossEntropyLoss()
 
     def forward(self, query_img, support_img, support_mask):
-        # print(query_img, "query")
-        # print(support_img, "support")
-        # print(support_mask, "mask")
         with torch.no_grad():
             query_feats = self.extract_feats(query_img, self.backbone, self.feat_ids, self.bottleneck_ids, self.lids)
             support_feats = self.extract_feats(support_img, self.backbone, self.feat_ids, self.bottleneck_ids, self.lids)
+
+            # Lets try masking the image before it goes in to get the features - Lucas 6/12/22
+            # masked_support = self.mask_support(support_img, support_mask.clone())
+            # support_feats = self.extract_feats(masked_support, self.backbone, self.feat_ids, self.bottleneck_ids, self.lids)
+
             support_feats = self.mask_feature(support_feats, support_mask.clone())
             corr = Correlation.multilayer_correlation(query_feats, support_feats, self.stack_ids)
 
@@ -57,6 +59,12 @@ class HypercorrSqueezeNetwork(nn.Module):
             logit_mask = F.interpolate(logit_mask, support_img.size()[2:], mode='bilinear', align_corners=True)
 
         return logit_mask
+
+    def mask_support(self, support_imgs, support_mask):
+        for idx, feature in enumerate(support_imgs):
+            mask = F.interpolate(support_mask.unsqueeze(1).float(), support_imgs.size()[2:], mode='bilinear', align_corners=True)
+            support_imgs[idx] = support_imgs[idx] * mask
+        return support_imgs
 
     def mask_feature(self, features, support_mask):
         for idx, feature in enumerate(features):
@@ -84,8 +92,8 @@ class HypercorrSqueezeNetwork(nn.Module):
         max_vote = torch.stack([max_vote, torch.ones_like(max_vote).long()])
         max_vote = max_vote.max(dim=0)[0].view(bsz, 1, 1)
         pred_mask = logit_mask_agg.float() / max_vote
-        pred_mask[pred_mask < 0.5] = 0
-        pred_mask[pred_mask >= 0.5] = 1
+        pred_mask[pred_mask < 0.8] = 0
+        pred_mask[pred_mask >= 0.8] = 1
 
         return pred_mask
 

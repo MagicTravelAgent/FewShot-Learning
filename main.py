@@ -41,7 +41,7 @@ def test(model, dataloader, nshot):
     return np.array(ious).mean()
 
 
-if __name__ == '__main__':
+def HSNet_test():
 
     # ===============================================================================
     # Let's a-go!
@@ -54,7 +54,7 @@ if __name__ == '__main__':
         "lr": 1e-3,
         "nworker": 0,
         "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
-        "nshot": 5,
+        "nshot": 7,
         "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
         "visualize": True,
         "use_original_imgsize": True
@@ -90,3 +90,5 @@ if __name__ == '__main__':
     with torch.no_grad():
         test_miou = test(model, dataloader_test, args["nshot"])
     print("Mean IOU:", test_miou)
+
+HSNet_test()
