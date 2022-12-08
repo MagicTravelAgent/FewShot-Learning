@@ -3,6 +3,8 @@ import torch.nn.functional as F
 import torch.nn as nn
 import numpy as np
 from tqdm import tqdm
+import torchvision
+from torchvision.transforms.functional import to_pil_image
 
 from docs.HSNet.Model.HSNet import HypercorrSqueezeNetwork
 from docs.HSNet.Common import Utils
@@ -70,7 +72,6 @@ def test_mms(model, dataloader):
     return np.array(ious).mean()
 
 def HSNet_test():
-
     # ===============================================================================
     # Let's a-go!
     # ===============================================================================
@@ -78,9 +79,6 @@ def HSNet_test():
     args = {
         "datapath": 'docs/Data/',
         "benchmark": 'custom',  # dataloader selection
-        "bsz": 1,
-        "lr": 1e-3,
-        "nworker": 0,
         "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
         "nshot": 7,
         "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
@@ -121,6 +119,67 @@ def HSNet_test():
     print("Mean IOU:", test_miou)
 
 
-# https://colab.research.google.com/github/open-mmlab/mmsegmentation/blob/master/demo/MMSegmentation_Tutorial.ipynb#scrollTo=UWyLrLYaNEaL
-# https://colab.research.google.com/github/sithu31296/semantic-segmentation/blob/main/notebooks/tutorial.ipynb#scrollTo=s9-pnh25Rjz9
-HSNet_test()
+
+def test_CNN_loop(model, dataloader, confidence):
+    r""" Test HSNet """
+
+    ious = []
+    for idx, batch in tqdm(enumerate(dataloader)):
+
+        # 1. Networks forward pass
+        output = model(batch['query_img'])["out"].softmax(dim=1)
+
+        pred_mask = torch.unsqueeze(output[0, 15], 0)
+        pred_mask[pred_mask < confidence] = 0
+        pred_mask[pred_mask >= confidence] = 1
+
+        assert pred_mask.size() == batch['query_mask'].size()
+
+        # 2. Evaluate prediction
+        area_inter, area_union = Evaluator.classify_prediction(pred_mask.clone(), batch)
+        iou = area_inter[1].float() / area_union[1].float()
+
+        pred_mask = to_pil_image(pred_mask)
+
+        # Visualize predictions
+        if Visualizer.visualize:
+            Visualizer.visualize_prediction_CNN(idx, batch['query_img'][0], batch['query_mask'][0], pred_mask, iou=iou)
+        ious.append(iou[0].float().item())
+    return np.array(ious).mean()
+
+
+
+def CNN_test():
+    args = {
+        "datapath": 'docs/Data/',
+        "benchmark": 'custom',  # dataloader selection
+        "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
+        "visualize": True,
+        "use_original_imgsize": False,
+        "confidence level": 0.5
+    }
+
+    # Load the pretrained segmentation model
+    model = torchvision.models.segmentation.deeplabv3_resnet101(pretrained=True)
+
+    # Set the model to eval mode
+    model.eval()
+
+     # Helper classes (for testing) initialization
+    Evaluator.initialize()
+    Visualizer.initialize(args["visualize"])
+
+    # Dataset initialization
+    FSSDataset.initialize(
+        img_size=400, datapath=args["datapath"], use_original_imgsize=args["use_original_imgsize"])
+    dataloader_test = FSSDataset.build_dataloader(
+        benchmark=args["benchmark"], experiment='test', shot=1)
+
+    # Test CNN
+    test_miou = []
+    with torch.no_grad():
+        test_miou = test_CNN_loop(model, dataloader_test, args["confidence level"])
+    print("Mean IOU:", test_miou) 
+
+# HSNet_test()
+CNN_test()

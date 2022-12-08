@@ -73,6 +73,26 @@ class Visualizer:
         merged_pil.save(cls.vis_path + '%d_%d_iou-%.2f' % (batch_idx, sample_idx, iou) + '.jpg')
 
     @classmethod
+    def visualize_prediction_CNN(cls, idx, qry_img, qry_mask, pred_mask, iou=None):
+
+        qry_color = cls.colors['red']
+        pred_color = cls.colors['red']
+        
+        qry_img = cls.to_numpy(qry_img, 'img')
+        qry_mask = cls.to_numpy(qry_mask, 'mask')
+
+        # pred_mask.show()
+        pred_mask = np.array(pred_mask)/255
+
+        qry_masked_pil = Image.fromarray(cls.apply_mask(qry_img.astype(np.uint8), qry_mask.astype(np.uint8), qry_color))
+        pred_masked_pil = Image.fromarray(cls.apply_mask(qry_img.astype(np.uint8), pred_mask.astype(np.uint8), pred_color))
+        
+        merged_pil = cls.merge_image_pair([pred_masked_pil, qry_masked_pil])
+
+        iou = iou.item() if iou else 0.0
+        merged_pil.save(cls.vis_path + '%d_CNN_iou-%.2f' % (idx, iou) + '.jpg')
+
+    @classmethod
     def merge_image_pair(cls, pil_imgs):
         r""" Horizontally aligns a pair of pytorch tensor images (3, H, W) and returns PIL object """
 

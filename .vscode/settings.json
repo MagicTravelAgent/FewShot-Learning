@@ -8,5 +8,6 @@
         "isin",
         "tqdm"
     ],
-    "python.analysis.typeCheckingMode": "basic"
+    "python.analysis.typeCheckingMode": "basic",
+    "python.formatting.provider": "black"
 }
