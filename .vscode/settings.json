@@ -4,6 +4,9 @@
         "convolutional",
         "demarked",
         "frompyfunc",
-        "isin"
-    ]
+        "Hypercorr",
+        "isin",
+        "tqdm"
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }

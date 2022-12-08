@@ -10,8 +10,7 @@ from docs.HSNet.Common.Visualizer import Visualizer
 from docs.HSNet.Common.Evaluator import Evaluator
 from docs.HSNet.DataLoader.FSSDataset import FSSDataset
 
-
-def test(model, dataloader, nshot):
+def test_fss(model, dataloader, nshot):
     r""" Test HSNet """
 
     # Freeze randomness during testing for reproducibility
@@ -40,6 +39,35 @@ def test(model, dataloader, nshot):
         ious.append(iou[0].float().item())
     return np.array(ious).mean()
 
+
+def test_mms(model, dataloader):
+    r""" Test HSNet """
+
+    # Freeze randomness during testing for reproducibility
+    Utils.fix_randseed(0)
+
+    ious = []
+    for idx, batch in tqdm(enumerate(dataloader)):
+
+        # 1. Networks forward pass
+        batch = Utils.to_cuda(batch)
+        pred_mask = model.module.predict_mask_nshot(batch)
+
+        assert pred_mask.size() == batch['query_mask'].size()
+
+        # 2. Evaluate prediction
+        area_inter, area_union = Evaluator.classify_prediction(
+            pred_mask.clone(), batch)
+        # print("IOU:",area_inter/area_union)
+        iou = area_inter[1].float() / area_union[1].float()
+
+        # Visualize predictions
+        if Visualizer.visualize:
+            Visualizer.visualize_prediction_batch(batch['support_imgs'], batch['support_masks'],
+                                                  batch['query_img'], batch['query_mask'],
+                                                  pred_mask, idx, iou_b=iou)
+        ious.append(iou[0].float().item())
+    return np.array(ious).mean()
 
 def HSNet_test():
 
@@ -87,8 +115,12 @@ def HSNet_test():
         benchmark=args["benchmark"], experiment='test', shot=args["nshot"])
 
     # Test HSNet
+    test_miou = []
     with torch.no_grad():
-        test_miou = test(model, dataloader_test, args["nshot"])
+        test_miou = test_fss(model, dataloader_test, args["nshot"])
     print("Mean IOU:", test_miou)
 
+
+# https://colab.research.google.com/github/open-mmlab/mmsegmentation/blob/master/demo/MMSegmentation_Tutorial.ipynb#scrollTo=UWyLrLYaNEaL
+# https://colab.research.google.com/github/sithu31296/semantic-segmentation/blob/main/notebooks/tutorial.ipynb#scrollTo=s9-pnh25Rjz9
 HSNet_test()
