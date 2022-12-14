@@ -181,5 +181,5 @@ def CNN_test():
         test_miou = test_CNN_loop(model, dataloader_test, args["confidence level"])
     print("Mean IOU:", test_miou) 
 
-# HSNet_test()
-CNN_test()
+HSNet_test()
+# CNN_test()
