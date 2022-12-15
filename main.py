@@ -12,7 +12,9 @@ from docs.HSNet.Common.Visualizer import Visualizer
 from docs.HSNet.Common.Evaluator import Evaluator
 from docs.HSNet.DataLoader.FSSDataset import FSSDataset
 
-def test_fss(model, dataloader, nshot):
+from docs.MSANet.MSAmain import get_msa_model
+
+def test_HSNet_loop(model, dataloader, nshot):
     r""" Test HSNet """
 
     # Freeze randomness during testing for reproducibility
@@ -24,36 +26,6 @@ def test_fss(model, dataloader, nshot):
         # 1. Hypercorrelation Squeeze Networks forward pass
         batch = Utils.to_cuda(batch)
         pred_mask = model.module.predict_mask_nshot(batch, nshot=nshot)
-
-        assert pred_mask.size() == batch['query_mask'].size()
-
-        # 2. Evaluate prediction
-        area_inter, area_union = Evaluator.classify_prediction(
-            pred_mask.clone(), batch)
-        # print("IOU:",area_inter/area_union)
-        iou = area_inter[1].float() / area_union[1].float()
-
-        # Visualize predictions
-        if Visualizer.visualize:
-            Visualizer.visualize_prediction_batch(batch['support_imgs'], batch['support_masks'],
-                                                  batch['query_img'], batch['query_mask'],
-                                                  pred_mask, idx, iou_b=iou)
-        ious.append(iou[0].float().item())
-    return np.array(ious).mean()
-
-
-def test_mms(model, dataloader):
-    r""" Test HSNet """
-
-    # Freeze randomness during testing for reproducibility
-    Utils.fix_randseed(0)
-
-    ious = []
-    for idx, batch in tqdm(enumerate(dataloader)):
-
-        # 1. Networks forward pass
-        batch = Utils.to_cuda(batch)
-        pred_mask = model.module.predict_mask_nshot(batch)
 
         assert pred_mask.size() == batch['query_mask'].size()
 
@@ -115,7 +87,7 @@ def HSNet_test():
     # Test HSNet
     test_miou = []
     with torch.no_grad():
-        test_miou = test_fss(model, dataloader_test, args["nshot"])
+        test_miou = test_HSNet_loop(model, dataloader_test, args["nshot"])
     print("Mean IOU:", test_miou)
 
 
@@ -181,5 +153,7 @@ def CNN_test():
         test_miou = test_CNN_loop(model, dataloader_test, args["confidence level"])
     print("Mean IOU:", test_miou) 
 
-HSNet_test()
+
+
+# HSNet_test()
 # CNN_test()
