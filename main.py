@@ -12,8 +12,6 @@ from docs.HSNet.Common.Visualizer import Visualizer
 from docs.HSNet.Common.Evaluator import Evaluator
 from docs.HSNet.DataLoader.FSSDataset import FSSDataset
 
-from docs.MSANet.MSAmain import get_msa_model
-
 def test_HSNet_loop(model, dataloader, nshot):
     r""" Test HSNet """
 
@@ -125,7 +123,6 @@ def CNN_test():
     args = {
         "datapath": 'docs/Data/',
         "benchmark": 'custom',  # dataloader selection
-        "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
         "visualize": True,
         "use_original_imgsize": False,
         "confidence level": 0.5
