@@ -12,7 +12,6 @@ from docs.HSNet.Common.Visualizer import Visualizer
 from docs.HSNet.Common.Evaluator import Evaluator
 from docs.HSNet.DataLoader.FSSDataset import FSSDataset
 
-from docs.MSANet.MSAmain import get_msa_model
 
 def test_HSNet_loop(model, dataloader, nshot):
     r""" Test HSNet """
