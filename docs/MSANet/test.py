@@ -71,15 +71,17 @@ def get_model(args):
     check_makedirs(args.snapshot_path)
     check_makedirs(args.result_path)
     if args.weight:
-        weight_path = osp.join(args.snapshot_path, args.weight)
+        weight_path = args.weight
         if os.path.isfile(weight_path):
             logger.info("=> loading checkpoint '{}'".format(weight_path))
             checkpoint = torch.load(weight_path, map_location=torch.device('cpu'))
             args.start_epoch = checkpoint['epoch']
             new_param = checkpoint['state_dict']
             try:
+                print("trying")
                 model.load_state_dict(new_param)
             except RuntimeError:  # 1GPU loads mGPU model
+                print("excepting")
                 for key in list(new_param.keys()):
                     new_param[key[7:]] = new_param.pop(key)
                 model.load_state_dict(new_param)
@@ -113,7 +115,8 @@ def main():
 
     logger.info("=> creating model ...")
     model = get_model(args)
-    logger.info(model)
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
 
     # ----------------------  DATASET  ----------------------
     value_scale = 255

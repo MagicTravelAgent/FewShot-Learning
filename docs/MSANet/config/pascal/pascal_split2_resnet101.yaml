@@ -18,7 +18,7 @@ Train:
   padding_label: 255
   # Dataset & Mode
   split: 2
-  shot: 1
+  shot: 5
   data_set: 'pascal'
   use_split_coco: False # True means FWB setting
   # Optimizer
@@ -61,7 +61,7 @@ Method:
   merge_tau: 0.9     # fusion threshold tau
 
 Test_Finetune:
-  weight: /home/nvadmin/Few-shot-learning/Our_model_ public/Weights/Our_model_with_gam/pascal/5_shot/split2/resnet101/resnet101_5_2_0.7316.pth # load weight for fine-tuning or testing (such as train_epoch_107_0.6897.pth)
+  weight: docs/MSANet/model/ignore/resnet101_5_2_0.7316.pth # load weight for fine-tuning or testing (such as train_epoch_107_0.6897.pth)
   ann_type: 'mask' # mask/bbox
 
 

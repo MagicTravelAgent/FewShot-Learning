@@ -153,5 +153,5 @@ def CNN_test():
 
 
 
-HSNet_test()
+# HSNet_test()
 # CNN_test()
