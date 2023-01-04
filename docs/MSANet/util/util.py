@@ -7,7 +7,7 @@ import cv2
 import math
 from tqdm import tqdm
 from scipy import ndimage
-from util.get_weak_anns import find_bbox
+from docs.MSANet.util.get_weak_anns import find_bbox
 
 import torch
 from torch import nn

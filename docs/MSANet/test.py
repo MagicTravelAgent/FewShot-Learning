@@ -23,14 +23,14 @@ from torch.utils.data.distributed import DistributedSampler
 
 from tensorboardX import SummaryWriter
 
-from model import MSANet
+from docs.MSANet.model import MSANet
 
-from util import dataset
-from util import transform, transform_tri, config
-from util.util import AverageMeter, poly_learning_rate, intersectionAndUnionGPU, get_model_para_number, setup_seed, \
+from docs.MSANet.util import dataset
+from docs.MSANet.util import transform, transform_tri, config
+from docs.MSANet.util.util import AverageMeter, poly_learning_rate, intersectionAndUnionGPU, get_model_para_number, setup_seed, \
     get_logger, get_save_path, \
     is_same_model, fix_bn, sum_list, check_makedirs
-from util.vis import Visualizer
+from docs.MSANet.util.vis import Visualizer
 
 cv2.ocl.setUseOpenCL(False)
 cv2.setNumThreads(0)
@@ -73,7 +73,6 @@ def get_model(args):
     if args.weight:
         weight_path = args.weight
         if os.path.isfile(weight_path):
-            logger.info("=> loading checkpoint '{}'".format(weight_path))
             checkpoint = torch.load(weight_path, map_location=torch.device('cpu'))
             args.start_epoch = checkpoint['epoch']
             new_param = checkpoint['state_dict']
@@ -86,16 +85,15 @@ def get_model(args):
                     new_param[key[7:]] = new_param.pop(key)
                 model.load_state_dict(new_param)
             # optimizer.load_state_dict(checkpoint['optimizer'])
-            logger.info("=> loaded checkpoint '{}' (epoch {})".format(weight_path, checkpoint['epoch']))
+            print("=> loaded checkpoint '{}' (epoch {})".format(weight_path, checkpoint['epoch']))
         else:
-            logger.info("=> no checkpoint found at '{}'".format(weight_path))
+            print("=> no checkpoint found at '{}'".format(weight_path))
 
     # Get model para.
     total_number, learnable_number = get_model_para_number(model)
     print('Number of Parameters: %d' % (total_number))
     print('Number of Learnable Parameters: %d' % (learnable_number))
 
-    time.sleep(5)
     return model
 
 

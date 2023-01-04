@@ -9,9 +9,9 @@ import random
 import time
 import cv2
 
-import model.resnet as models
-import model.vgg as vgg_models
-from model.PPM import PPM
+import docs.MSANet.model.resnet as models
+import docs.MSANet.model.vgg as vgg_models
+from docs.MSANet.model.PPM import PPM
 
 
 def get_vgg16_layer(model):

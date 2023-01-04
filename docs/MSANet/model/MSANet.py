@@ -9,16 +9,16 @@ import random
 import time
 import cv2
 
-import model.resnet as models
-import model.vgg as vgg_models
-from model.ASPP import ASPP
-from model.PPM import PPM
-from model.PSPNet import OneModel as PSPNet
-from util.util import get_train_val_set
-from model.feature import extract_feat_res, extract_feat_vgg
+import docs.MSANet.model.resnet as models
+import docs.MSANet.model.vgg as vgg_models
+from docs.MSANet.model.ASPP import ASPP
+from docs.MSANet.model.PPM import PPM
+from docs.MSANet.model.PSPNet import OneModel as PSPNet
+from docs.MSANet.util.util import get_train_val_set
+from docs.MSANet.model.feature import extract_feat_res, extract_feat_vgg
 from functools import reduce
 from operator import add
-from model.correlation import Correlation
+from docs.MSANet.model.correlation import Correlation
 
 def Weighted_GAP(supp_feat, mask):
     supp_feat = supp_feat * mask
@@ -213,7 +213,8 @@ class OneModel(nn.Module):
         for param in model.learner_base.parameters():
             param.requires_grad = False
 
-    def forward(self, x, s_x, s_y, y_m, y_b, cat_idx=None):
+    def forward(self, x, s_x, s_y, cat_idx=None):
+        # y_m and y_b only for training apparently
         x_size = x.size()
         bs = x_size[0]
         h = int((x_size[2] - 1) / 8 * self.zoom_factor + 1)
