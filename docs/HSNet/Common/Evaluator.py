@@ -9,6 +9,10 @@ class Evaluator:
     @classmethod
     def classify_prediction(cls, pred_mask, batch):
         gt_mask = batch.get('query_mask')
+        query_name = batch.get("query_name")
+        print(query_name)
+        output_dict = {}
+        # here collect information about the query mask: size, globules (and their size), 
 
         # Apply ignore_index in PASCAL-5i masks (following evaluation scheme in PFE-Net (TPAMI 2020))
         query_ignore_idx = batch.get('query_ignore_idx')
@@ -34,4 +38,6 @@ class Evaluator:
         area_gt = torch.stack(area_gt).t()
         area_union = area_pred + area_gt - area_inter
 
-        return area_inter, area_union
+        # return a dictionary containing the whole evaluation
+
+        return area_inter, area_union, output_dict

@@ -26,16 +26,15 @@ def test_MSANet_loop(model, dataloader):
 
         # 1. Hypercorrelation Squeeze Networks forward pass
         batch = Utils.to_cuda(batch)
-        pred_mask, meta_out, base_out = model(batch['query_img'], batch['support_imgs'], batch['support_masks'], cat_idx=None)
+        pred_mask, _, _ = model(batch['query_img'], batch['support_imgs'], batch['support_masks'], cat_idx=None)
         pred_mask = pred_mask.max(1)[1]
 
         assert pred_mask.size() == batch['query_mask'].size()
 
         # 2. Evaluate prediction
-        area_inter, area_union = Evaluator.classify_prediction(
-            pred_mask.clone(), batch)
-        # print("IOU:",area_inter/area_union)
+        area_inter, area_union, eval_dict = Evaluator.classify_prediction(pred_mask.clone(), batch)
         iou = area_inter[1].float() / area_union[1].float()
+        eval.append(eval_dict)
 
         # Visualize predictions
         if Visualizer.visualize:
@@ -81,11 +80,10 @@ def MSANet_test():
     dataloader_test = FSSDataset.build_dataloader(
         benchmark=args["benchmark"], experiment='test', shot=args["nshot"])
 
-    # Test HSNet
-    test_miou = []
+    # Test MSANet
     with torch.no_grad():
-        test_miou = test_MSANet_loop(model, dataloader_test)
-    print("Mean IOU:", test_miou)
+        eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"])
+    # eval_list to be saved and analysed
 
 def test_HSNet_loop(model, dataloader, nshot):
     r""" Test HSNet """
@@ -93,7 +91,7 @@ def test_HSNet_loop(model, dataloader, nshot):
     # Freeze randomness during testing for reproducibility
     Utils.fix_randseed(0)
 
-    ious = []
+    eval = []
     for idx, batch in tqdm(enumerate(dataloader)):
 
         # 1. Hypercorrelation Squeeze Networks forward pass
@@ -103,18 +101,17 @@ def test_HSNet_loop(model, dataloader, nshot):
         assert pred_mask.size() == batch['query_mask'].size()
 
         # 2. Evaluate prediction
-        area_inter, area_union = Evaluator.classify_prediction(
-            pred_mask.clone(), batch)
-        # print("IOU:",area_inter/area_union)
+        area_inter, area_union, eval_dict = Evaluator.classify_prediction(pred_mask.clone(), batch)
         iou = area_inter[1].float() / area_union[1].float()
+        eval.append(eval_dict)
 
         # Visualize predictions
         if Visualizer.visualize:
             Visualizer.visualize_prediction_batch(batch['support_imgs'], batch['support_masks'],
                                                   batch['query_img'], batch['query_mask'],
                                                   pred_mask, idx, iou_b=iou)
-        ious.append(iou[0].float().item())
-    return np.array(ious).mean()
+    print("Segmentation Complete")
+    return eval
 
 def HSNet_test():
     # ===============================================================================
@@ -160,8 +157,8 @@ def HSNet_test():
     # Test HSNet
     test_miou = []
     with torch.no_grad():
-        test_miou = test_HSNet_loop(model, dataloader_test, args["nshot"])
-    print("Mean IOU:", test_miou)
+        eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"])
+    # eval_list to be saved and analysed
 
 
 
@@ -169,6 +166,7 @@ def test_CNN_loop(model, dataloader, confidence):
     r""" Test HSNet """
 
     ious = []
+    eval = []
     for idx, batch in tqdm(enumerate(dataloader)):
 
         # 1. Networks forward pass
@@ -181,8 +179,9 @@ def test_CNN_loop(model, dataloader, confidence):
         assert pred_mask.size() == batch['query_mask'].size()
 
         # 2. Evaluate prediction
-        area_inter, area_union = Evaluator.classify_prediction(pred_mask.clone(), batch)
+        area_inter, area_union, eval_dict = Evaluator.classify_prediction(pred_mask.clone(), batch)
         iou = area_inter[1].float() / area_union[1].float()
+        eval.append(eval_dict)
 
         pred_mask = to_pil_image(pred_mask)
 
@@ -190,7 +189,8 @@ def test_CNN_loop(model, dataloader, confidence):
         if Visualizer.visualize:
             Visualizer.visualize_prediction_CNN(idx, batch['query_img'][0], batch['query_mask'][0], pred_mask, iou=iou)
         ious.append(iou[0].float().item())
-    return np.array(ious).mean()
+    print("Segmentation Complete")
+    return eval
 
 
 
@@ -220,13 +220,12 @@ def CNN_test():
         benchmark=args["benchmark"], experiment='test', shot=1)
 
     # Test CNN
-    test_miou = []
     with torch.no_grad():
-        test_miou = test_CNN_loop(model, dataloader_test, args["confidence level"])
-    print("Mean IOU:", test_miou) 
+        eval_list = test_CNN_loop(model, dataloader_test, args["confidence level"])
+    # eval_list saved for analysis
 
 
 
 # HSNet_test()
-# CNN_test()
-MSANet_test()
+CNN_test()
+# MSANet_test()
