@@ -22,6 +22,7 @@ def test_MSANet_loop(model, dataloader):
     Utils.fix_randseed(0)
 
     ious = []
+    eval = []
     for idx, batch in tqdm(enumerate(dataloader)):
 
         # 1. Hypercorrelation Squeeze Networks forward pass
@@ -42,7 +43,8 @@ def test_MSANet_loop(model, dataloader):
                                                   batch['query_img'], batch['query_mask'],
                                                   pred_mask, idx, iou_b=iou)
         ious.append(iou[0].float().item())
-    return np.array(ious).mean()
+    print("Mean IOU", np.array(ious).mean())
+    return eval
 
 def MSANet_test():
     # ===============================================================================
@@ -53,9 +55,9 @@ def MSANet_test():
         "datapath": 'docs/Data/',
         "benchmark": 'custom',  # dataloader selection
         "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
-        "nshot": 7,
+        "nshot": 5,
         "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
-        "visualize": True,
+        "visualize": False,
         "use_original_imgsize": False
     }
 
@@ -122,10 +124,10 @@ def HSNet_test():
         "datapath": 'docs/Data/',
         "benchmark": 'custom',  # dataloader selection
         "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
-        "nshot": 7,
+        "nshot": 5,
         "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
         "visualize": True,
-        "use_original_imgsize": True
+        "use_original_imgsize": False
     }
 
     # Model initialization
