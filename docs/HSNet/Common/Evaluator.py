@@ -10,7 +10,6 @@ class Evaluator:
     def classify_prediction(cls, pred_mask, batch):
         gt_mask = batch.get('query_mask')
         query_name = batch.get("query_name")
-        print(query_name)
         output_dict = {}
         # here collect information about the query mask: size, globules (and their size), 
         output_dict["query_name"] = query_name[0]
@@ -49,11 +48,12 @@ class Evaluator:
         area_gt = torch.stack(area_gt).t()
         area_union = area_pred + area_gt - area_inter
 
-        output_dict["union"] = area_union[1].float()
+        output_dict["union"] = area_union[0].item()
         output_dict["IOU"] = output_dict["intersection_size"] / output_dict["union"]
-        output_dict["percent_y"] = output_dict["intersection_size"] / output_dict["pred_mask_size"]
+        if (output_dict["pred_mask_size"] < 1):
+            output_dict["percent_y"] = 0
+        else:
+            output_dict["percent_y"] = output_dict["intersection_size"] / output_dict["pred_mask_size"]
 
         # return a dictionary containing the whole evaluation
-
-        print(output_dict)
         return area_inter, area_union, output_dict

@@ -5,6 +5,7 @@ import numpy as np
 from tqdm import tqdm
 import torchvision
 from torchvision.transforms.functional import to_pil_image
+import pandas as pd
 
 from docs.HSNet.Model.HSNet import HypercorrSqueezeNetwork
 from docs.HSNet.Common import Utils
@@ -160,8 +161,10 @@ def HSNet_test():
     test_miou = []
     with torch.no_grad():
         eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"])
-    # eval_list to be saved and analysed
-
+    
+    # eval_list saved for analysis
+    df = pd.DataFrame.from_dict(eval_list)
+    df.to_csv("docs/output/HSNet_80_full.csv")
 
 
 def test_CNN_loop(model, dataloader, confidence):
@@ -224,10 +227,12 @@ def CNN_test():
     # Test CNN
     with torch.no_grad():
         eval_list = test_CNN_loop(model, dataloader_test, args["confidence level"])
+    
     # eval_list saved for analysis
+    df = pd.DataFrame.from_dict(eval_list)
+    df.to_csv("docs/output/CNN.csv")
 
 
-
-# HSNet_test()
-CNN_test()
+HSNet_test()
+# CNN_test()
 # MSANet_test()
