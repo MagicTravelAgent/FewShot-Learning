@@ -27,7 +27,7 @@ class DatasetCustom(Dataset):
 
 
     def __len__(self):
-        return 246 # can set this for more to get different support images for each query
+        return 1000 # can set this for more to get different support images for each query
                                 # there is a modulo later to allow for this
 
     def __getitem__(self, idx):

@@ -17,7 +17,7 @@ from docs.MSANet.test import get_model
 from docs.MSANet.test import get_parser
 
 def test_MSANet_loop(model, dataloader):
-    r""" Test HSNet """
+    r""" Test MSANet """
 
     # Freeze randomness during testing for reproducibility
     Utils.fix_randseed(0)
@@ -85,8 +85,11 @@ def MSANet_test():
 
     # Test MSANet
     with torch.no_grad():
-        eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"])
-    # eval_list to be saved and analysed
+        eval_list = test_MSANet_loop(model, dataloader_test)
+    
+    # eval_list saved for analysis
+    df = pd.DataFrame.from_dict(eval_list)
+    df.to_csv("docs/output/MSA_top20.csv")
 
 def test_HSNet_loop(model, dataloader, nshot):
     r""" Test HSNet """
@@ -233,6 +236,6 @@ def CNN_test():
     df.to_csv("docs/output/CNN.csv")
 
 
-HSNet_test()
+# HSNet_test()
 # CNN_test()
-# MSANet_test()
+MSANet_test()
