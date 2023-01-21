@@ -27,7 +27,7 @@ class DatasetCustom(Dataset):
 
 
     def __len__(self):
-        return 246 # can set this for more to get different support images for each query
+        return 1000 # can set this for more to get different support images for each query
                                 # there is a modulo later to allow for this
 
     def __getitem__(self, idx):
@@ -135,5 +135,5 @@ class DatasetCustom(Dataset):
           file_list = f.read().split('\n')[:-1]
         return file_list
       
-      self.supports = read("support", experiment)
+      self.supports = read("support_full", experiment)
       self.querys = read("query", experiment)
