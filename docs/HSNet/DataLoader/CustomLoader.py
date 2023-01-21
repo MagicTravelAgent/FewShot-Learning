@@ -135,5 +135,5 @@ class DatasetCustom(Dataset):
           file_list = f.read().split('\n')[:-1]
         return file_list
       
-      self.supports = read("support", experiment)
+      self.supports = read("support_full", experiment)
       self.querys = read("query", experiment)
