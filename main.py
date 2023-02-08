@@ -44,6 +44,7 @@ def test_MSANet_loop(model, dataloader):
                                                   batch['query_img'], batch['query_mask'],
                                                   pred_mask, idx, iou_b=iou)
         ious.append(iou[0].float().item())
+        print(iou[0].float().item())
     print("Mean IOU", np.array(ious).mean())
     return eval
 
@@ -58,7 +59,7 @@ def MSANet_test():
         "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
         "nshot": 5,
         "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
-        "visualize": False,
+        "visualize": True,
         "use_original_imgsize": False
     }
 
