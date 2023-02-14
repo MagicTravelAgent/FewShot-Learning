@@ -20,7 +20,7 @@ FSS networks typically work using a technique called "episodes" of support and q
 
 The backbone network extracts features from different layers, ranging from simple shapes such as circles and lines to more complex textures. The features extracted from the support image are then compared to the features extracted from the query image. The network identifies the areas in the query image that look similar to the new class features, and uses this information to segment the new class out of the query image.
 
-(feature map explanation picture)
+![Feature_Maps](Images/Feature_Maps.png)
 
 One key feature of FSS is its ability to generalize what the network has learned to new images. This is achieved by training the network on a large number of episodes, each containing a different pair of support and query images, to learn the features and patterns of the new class. The network is then able to recognize similar features in the query image and segment out the new class.
 
@@ -32,7 +32,8 @@ Additionally, FSS models also use various techniques like meta-learning, attenti
 
 In summary, and as shown in the diagram below, FSS networks use a pre-trained CNN to extract features from support and query images, compare the features, and segment new classes out of the query image by identifying similar patterns. They are able to learn from a small number of examples and generalize to new images and classes by training on a large number of episodes, and by incorporating various techniques to improve their performance. I will now explore a few FSS networks more in-depth: the Hyper Correlation Squeeze Network (HSNet), Multi-Similarity and Attention Guidance network (MSANet), test them on a dataset and compare the results to a state of the art segmentation model that was trained on a large number of images.
 
-(fss explained)
+![FSS_recap](Images/FSS_recap.png)
+
 
 # Hyper Correlation Squeeze Network
 **HSNet uses a pixel-wise comparison between the support and query images to generate a precise mask of the novel class on the query image**
@@ -43,7 +44,7 @@ The model works by comparing every pixel in the query image with every pixel in 
 
 During the training process, episodes of images are fed through a backbone CNN, which produces pairs of feature maps (one map for the support image and one for the query image). A variety of networks can be chosen to produce the feature maps, however RESNET-101 achieved the best results. The feature maps from the support image are masked so that irrelevant activations are not used.
 
-(HSNet decoder)
+![HSNet_Decoder](Images/HSNet_Decoder.png)
 
 Next, the model analyses each feature map pair to create a 4D correlation tensor. This tensor measures the similarity between the support features and query features at a pixel wise level. This process is repeated for all feature map pairs, and all the 4D correlation tensors are combined into an overall encoded context. The resulting context contains how similar each pixel is from the support image to each pixel in the query image at every level in the backbone network.
 
@@ -61,16 +62,16 @@ MSANet works with a similar high-level strategy as HSNet. It breaks both images 
 
 The process begins by sending images through a Convolutional Neural Network (CNN) to extract feature map pairs. The feature maps of the support image, which serves as a reference, are then modified by removing any activations that do not correspond to the class of the image, and by squeezing the remaining pixels together by removing any pixels that are below the mean value for that feature map. On the other hand, the query images are not modified in this way as the network is looking for where the query images look most similar to the support images. To determine the similarity between the query and support images, the cosine similarity (CS) of each pixel in the query feature map is calculated with respect to all of the squeezed support feature maps, and an average is taken. This process is repeated for each of the extracted feature layers and the results are concatenated together. The final result is a multi-layered CS map that is passed through a 1x1 convolution to create a 2D map which shows where the query image is most similar to the masked support image.
 
-(Squeezed features)
+![MSANet_Squeeze](Images/MSANet_Squeeze.png)
 
-(cosine similarity)
+![MSANet_cosine](Images/MSANet_cosine.png)
 
 ## Attention Guidance
 **Guiding the network to look in the right places for the novel class**
 
 The attention guidance module uses lower level activation features of the masked support image. It concatenates the features together then passes them through a 1x1 convolution to create a flat 2D map of the features. Then it turns this 2D map into a vector that when passed over the query feature map creates a rough area where the two images have similar features.
 
-(image of attention guidance)
+![MSANet_attention](Images/MSANet_attention.png)
 
 ## ASPP & Classification
 Finally, the results of the CS map, the support and query features and the attention module are all combined together in an Atrous Spatial Pyramid Pooling (ASPP) module. Without going on a tangent, this module combines all the information given into it, enhancing certain features at different dilations of convolution. This creates a final tensor that is convolved into using a classifier into a final prediction mask.
@@ -78,7 +79,7 @@ Finally, the results of the CS map, the support and query features and the atten
 ## Base learner
 In addition, MSANet makes use of a base learner which is trained on thousands of different classes. This will create a segmentation of the image according to what it knows already. Then this segmentation is removed from the final classification up until now, trimming down any false positives that go outside the boundary of the novel class.
 
-(picture)
+![MSANet_complete](Images/MSANet_complete.png)
 
 # Comparison to conventional networks
 **Comparing FSS to CNN in the task of segmenting people**
@@ -100,7 +101,7 @@ In order to gain an extensive insight into how well each network was performing 
 
 To set the baseline performance of the CNN I used, it achieved an average Intersection over Union (IOU) of 0.178. Though this score may seem low, it is important to note that it was heavily affected by instances where the CNN scored 0. This was due to a variety of factors such as small and distant individuals in the dataset, grainy images, and loss of information through image resizing. As shown in the following image, the network's performance also varied based on the size of the people in the image.        
 
-(CNN IOU against class size)
+![CNN_IOU_Classize](Images/CNN_IOU_Classize.png)
 
 The CNN's performance on larger individuals in the dataset, with an average IOU of 0.65 to 0.75, is consistent with its overall performance on the dataset it was trained on. Additionally, it is known that humans have difficulty seeing objects at a distance, hence CNN's ability to accurately segment distant individuals in images suggests that it performs to a similar level to people.
 
@@ -108,7 +109,7 @@ Furthermore, the network segmented individuals on bicycles, even though they wer
 
 Lastly, it was observed that the false positive rate of the CNN is influenced by the size of the person in the image. Larger individuals in the images resulted in a higher amount of false positive pixels being segmented, as seen in the accompanying graph.
 
-(False positive against class size CNN)
+![cnn_false_positives](Images/cnn_false_positives.png)
   
 ## Results – HSNet
 
@@ -116,7 +117,12 @@ The HSNet model has a mean IOU score of 0.07, which is lower than every other ne
 
 During the experimentation with the network, I discovered that the choice of support images has a significant impact on its performance. By sampling the support images from the top 20 largest people, I was able to increase the mean IOU from 0.07 to 0.13, nearly doubling its performance. The accompanying graphs provide a more detailed representation of the results.
 
-(Double graph of full support vs detailed support)
+
+Full Support Set             |  Detailed Support Set
+:-------------------------:|:-------------------------:
+![hsnet_full_IOU](Images/hsnet_full_IOU.png)  |  ![HSNet_top_IOU](Images/HSNet_top_IOU.png)
+
+
  
 To better understand the relationship between the network's performance and the size of the person in the image, I plotted the IOU score on the y-axis and the size of the person on the x-axis. As shown in the first graph, the network's performance varied widely when it could sample support images from any image containing people. The vertical clusters of datapoints represent the same image evaluated using different support images.
 
@@ -124,17 +130,21 @@ In the second graph, I limited the support image selection to only the 20 larges
 
 Despite the improved performance, HSNet still demonstrated a persistent issue with false positives across all support sets. The graph does not capture the extent of pixels incorrectly identified as people by the network. False positives can significantly impact the accuracy of the network and it is important to address this issue in future iterations of the model. Further investigation is needed to understand the root cause of the false positives and to find ways to reduce or eliminate them. Addressing this issue would likely lead to an even more reliable and accurate network, which would be of great value for a variety of computer vision applications. Below are some graphs that show the false positive rates for the two support sets.
 
-(Double graph of false positives)
+Full Support Set             |  Detailed Support Set
+:-------------------------:|:-------------------------:
+![HSNet_full_false_pos](Images/HSNet_full_false_pos.png)  |  ![HSNEt_top_false_pos](Images/HSNEt_top_false_pos.png)
 
 ## Results - MSANet
 
 MSANet also demonstrated improvement with the use of a more detailed support set, resulting in a mean IOU increase from 0.10 to 0.14. This improvement, although not a doubling, is still significant and brings the network's performance closer to the average IOU achieved by the CNN. The improved performance of MSANet highlights the importance of support set selection in FSS networks and the potential impact it can have on accuracy and reliability. The following graph has the results from the two support classes.
 
-(double graph of full support vs detailed support)
+Full Support Set             |  Detailed Support Set
+:-------------------------:|:-------------------------:
+![MSANet_full_IOU](Images/MSANet_full_IOU.png)  |  ![MSANet_top_IOU](Images/MSANet_top_IOU.png)
 
 The similarity between MSANet and the CNN extends beyond just the mean IOU score. The performance dynamics of the two networks also show similarities, particularly in how the network's performance increases with the size of the query image. As the size of the person in the query image increases, the performance of both MSANet and the CNN shows a logarithmic improvement. This logarithmic curve eventually flattens out after the query image size reaches around 0.5. These findings suggest that MSANet is a strong contender as an alternative to a CNN in scenarios where there may not be sufficient data available for training a more complex model. The logarithmic improvement with increasing query image size suggests that with bigger query images there are more features extracted from the novel class by the backbone and MSANet is more easily able to detect the class.
 
-(CNN vs MSANet IOU against class size)
+![MSANet_CNN_IOU](Images/MSANet_CNN_IOU.png)
 
 Despite the improved performance compared to HSNet, MSANet still falls behind the CNN in terms of false positive rate. Although the use of a detailed support set helped reduce the number of false positive pixels, the CNN still outperforms MSANet in this aspect with an average of only 2,000 false positive pixels per classification. This difference highlights the need for continual improvement and refinement in the design of these types of networks, especially in real-world applications where false positive detections can lead to serious consequences. Nonetheless, the improvement seen in MSANet demonstrates the potential for these networks to be used in a range of tasks, and with further advancements, they may one day rival or even surpass the performance of traditional CNNs.
 
