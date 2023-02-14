@@ -16,7 +16,7 @@ FSS is a technique in computer vision that allows a model to learn to identify n
 
 FSS networks typically work using a technique called "episodes" of support and query images. The network is provided with a support image that contains an instance of the new class, demarcated by a filter (or mask), and a query image that it needs to segment the new class out of. Both images are then passed through a "backbone" network, which is a pre-trained convolutional neural network (CNN) with the classification layers removed.
 
-(picture about episodes and masking)
+![backbone](Images/backbone.png)
 
 The backbone network extracts features from different layers, ranging from simple shapes such as circles and lines to more complex textures. The features extracted from the support image are then compared to the features extracted from the query image. The network identifies the areas in the query image that look similar to the new class features, and uses this information to segment the new class out of the query image.
 
