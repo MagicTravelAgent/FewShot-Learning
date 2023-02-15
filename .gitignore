@@ -3,3 +3,5 @@ vis/
 docs/MSANet/model/ignore/
 docs/Data/Annotations/
 docs/Data/JPEGImages/
+.vscode/
+.conda/
