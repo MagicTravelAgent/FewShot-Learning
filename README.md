@@ -1,5 +1,5 @@
 # Few-Shot Semantic Segmentation
-The full blogpost can be found here: [CLICK ME](docs\Pages\blogpost.html)
+The full blogpost can be found here: [CLICK ME](https://magictravelagent.github.io/FewShot-Learning/docs/Pages/blogpost.html)
 
 ## File structure
 Since there are a  great many files, the following diagram will show where important files are located in order to run this code yourself.\
