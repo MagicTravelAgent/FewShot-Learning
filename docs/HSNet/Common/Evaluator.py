@@ -48,7 +48,7 @@ class Evaluator:
         area_gt = torch.stack(area_gt).t()
         area_union = area_pred + area_gt - area_inter
 
-        output_dict["union"] = area_union[0].item()
+        output_dict["union"] = output_dict["y_mask_size"] + output_dict["pred_mask_size"] - output_dict["intersection_size"]
         output_dict["IOU"] = output_dict["intersection_size"] / output_dict["union"]
         if (output_dict["pred_mask_size"] < 1):
             output_dict["percent_y"] = 0

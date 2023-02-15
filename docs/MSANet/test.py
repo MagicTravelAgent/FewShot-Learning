@@ -41,16 +41,8 @@ setup_seed(val_manual_seed, False)
 seed_array = np.random.randint(0, 1000, val_num)  # seed->[0,999]
 
 
-def get_parser():
-    parser = argparse.ArgumentParser(description='PyTorch Few-Shot Semantic Segmentation')
-    parser.add_argument('--arch', type=str, default='MSANet')
-    parser.add_argument('--viz', action='store_true', default=True)
-    parser.add_argument('--visualize', action='store_true', default=False)
-    parser.add_argument('--config', type=str, default='docs\\MSANet\\config\\pascal\\pascal_split2_resnet101.yaml',
-                        help='config file')  # coco/coco_split0_resnet50.yaml
-    parser.add_argument('--opts', help='see config/ade20k/ade20k_pspnet50.yaml for all options', default=None,
-                        nargs=argparse.REMAINDER)
-    args = parser.parse_args()
+def get_parser(args):
+
     assert args.config is not None
     cfg = config.load_cfg_from_cfg_file(args.config)
     cfg = config.merge_cfg_from_args(cfg, args)
@@ -77,7 +69,6 @@ def get_model(args):
             args.start_epoch = checkpoint['epoch']
             new_param = checkpoint['state_dict']
             try:
-                print("trying")
                 model.load_state_dict(new_param)
             except RuntimeError:  # 1GPU loads mGPU model
                 print("excepting")
@@ -113,8 +104,6 @@ def main():
 
     logger.info("=> creating model ...")
     model = get_model(args)
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-
 
     # ----------------------  DATASET  ----------------------
     value_scale = 255
@@ -392,5 +381,5 @@ def validate(val_loader, model, val_seed, visual):
     return mIoU, mIoU_m, class_miou, class_miou_m, class_miou_b, iou_class[1]
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+    # main()

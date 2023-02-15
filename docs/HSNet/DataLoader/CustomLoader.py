@@ -6,11 +6,12 @@ import PIL.Image as Image
 import numpy as np
 
 class DatasetCustom(Dataset):
-    def __init__(self, datapath, transform, shot, use_original_imgsize, experiment):
+    def __init__(self, datapath, transform, shot, use_original_imgsize, experiment, length):
         self.benchmark = 'pascal'
         self.shot = shot
         self.use_original_imgsize = use_original_imgsize
         self.datapath = datapath
+        self.length = length
 
         # images and annotations in the same file for ease
         self.img_path = os.path.join(datapath, 'JPEGImages/')
@@ -27,7 +28,7 @@ class DatasetCustom(Dataset):
 
 
     def __len__(self):
-        return 1000 # can set this for more to get different support images for each query
+        return self.length # can set this for more to get different support images for each query
                                 # there is a modulo later to allow for this
 
     def __getitem__(self, idx):

@@ -6,6 +6,7 @@ from tqdm import tqdm
 import torchvision
 from torchvision.transforms.functional import to_pil_image
 import pandas as pd
+import argparse
 
 from docs.HSNet.Model.HSNet import HypercorrSqueezeNetwork
 from docs.HSNet.Common import Utils
@@ -48,22 +49,9 @@ def test_MSANet_loop(model, dataloader):
     print("Mean IOU", np.array(ious).mean())
     return eval
 
-def MSANet_test():
-    # ===============================================================================
-    # Let's a-go!
-    # ===============================================================================
-    # Arguments parsing
-    args = {
-        "datapath": 'docs/Data/',
-        "benchmark": 'custom',  # dataloader selection
-        "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
-        "nshot": 5,
-        "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
-        "visualize": True,
-        "use_original_imgsize": False
-    }
+def MSANet_test(args_args, args, dataloader_test):
 
-    args_msa = get_parser()
+    args_msa = get_parser(args_args)
     # Model initialization
     model = get_model(args_msa)
     model.eval()
@@ -71,18 +59,12 @@ def MSANet_test():
     # Device setup
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print('# available GPUs: %d' % torch.cuda.device_count())
-    model = nn.DataParallel(model)
+    model = nn.DataParallel(model) # It says that this doesn't exist for the version of tf I use, but when I remove it the whole thing breaks so ¯\_(ツ)_/¯
     model.to(device)
 
     # Helper classes (for testing) initialization
     Evaluator.initialize()
     Visualizer.initialize(args["visualize"])
-
-    # Dataset initialization
-    FSSDataset.initialize(
-        img_size=400, datapath=args["datapath"], use_original_imgsize=args["use_original_imgsize"])
-    dataloader_test = FSSDataset.build_dataloader(
-        benchmark=args["benchmark"], experiment='test', shot=args["nshot"])
 
     # Test MSANet
     with torch.no_grad():
@@ -120,20 +102,7 @@ def test_HSNet_loop(model, dataloader, nshot):
     print("Segmentation Complete")
     return eval
 
-def HSNet_test():
-    # ===============================================================================
-    # Let's a-go!
-    # ===============================================================================
-    # Arguments parsing
-    args = {
-        "datapath": 'docs/Data/',
-        "benchmark": 'custom',  # dataloader selection
-        "load": "docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt",
-        "nshot": 5,
-        "backbone": 'resnet101',  # choices=['vgg16', 'resnet50', 'resnet101']
-        "visualize": True,
-        "use_original_imgsize": False
-    }
+def HSNet_test(args, dataloader_test):
 
     # Model initialization
     model = HypercorrSqueezeNetwork(
@@ -143,7 +112,7 @@ def HSNet_test():
     # Device setup
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     print('# available GPUs: %d' % torch.cuda.device_count())
-    model = nn.DataParallel(model)
+    model = nn.DataParallel(model) # It says that this doesn't exist for the version of tf I use, but when I remove it the whole thing breaks so ¯\_(ツ)_/¯
     model.to(device)
 
     # Load trained model
@@ -155,14 +124,7 @@ def HSNet_test():
     Evaluator.initialize()
     Visualizer.initialize(args["visualize"])
 
-    # Dataset initialization
-    FSSDataset.initialize(
-        img_size=400, datapath=args["datapath"], use_original_imgsize=args["use_original_imgsize"])
-    dataloader_test = FSSDataset.build_dataloader(
-        benchmark=args["benchmark"], experiment='test', shot=args["nshot"])
-
     # Test HSNet
-    test_miou = []
     with torch.no_grad():
         eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"])
     
@@ -203,14 +165,7 @@ def test_CNN_loop(model, dataloader, confidence):
 
 
 
-def CNN_test():
-    args = {
-        "datapath": 'docs/Data/',
-        "benchmark": 'custom',  # dataloader selection
-        "visualize": True,
-        "use_original_imgsize": False,
-        "confidence level": 0.5
-    }
+def CNN_test(args, dataloader_test):
 
     # Load the pretrained segmentation model
     model = torchvision.models.segmentation.deeplabv3_resnet101(pretrained=True)
@@ -222,21 +177,54 @@ def CNN_test():
     Evaluator.initialize()
     Visualizer.initialize(args["visualize"])
 
-    # Dataset initialization
-    FSSDataset.initialize(
-        img_size=400, datapath=args["datapath"], use_original_imgsize=args["use_original_imgsize"])
-    dataloader_test = FSSDataset.build_dataloader(
-        benchmark=args["benchmark"], experiment='test', shot=1)
-
     # Test CNN
     with torch.no_grad():
-        eval_list = test_CNN_loop(model, dataloader_test, args["confidence level"])
+        eval_list = test_CNN_loop(model, dataloader_test, args["confidence_level"])
     
     # eval_list saved for analysis
     df = pd.DataFrame.from_dict(eval_list)
     df.to_csv("docs/output/CNN.csv")
 
 
-# HSNet_test()
-# CNN_test()
-MSANet_test()
+if __name__ == '__main__':
+
+    # Arguments parsing
+    parser = argparse.ArgumentParser(description='Few Shot Semantic Segmentation')
+    parser.add_argument('--model', type=str, default='CNN', choices=['CNN', 'HSNet', 'MSANet'])
+    parser.add_argument('--datapath', type=str, default='docs/Data/')
+    parser.add_argument('--test_size', type=int, default=100)
+    parser.add_argument('--benchmark', type=str, default='custom')
+    parser.add_argument('--load', type=str, default='docs/HSNet/Model/res101_pas/res101_pas_fold3/best_model.pt')
+    parser.add_argument('--nshot', type=int, default=5)
+    parser.add_argument('--backbone', type=str, default='resnet101')
+    parser.add_argument('--visualize', type=bool, default=True)
+    parser.add_argument('--use_original_imgsize', type=bool, default=False)
+    parser.add_argument('--confidence_level', type=int, default=0.5)
+
+    # ============== MSANet Parsing just ignore these ==============
+    parser.add_argument('--arch', type=str, default='MSANet')
+    parser.add_argument('--viz', action='store_true', default=True)
+    # parser.add_argument('--visualize', action='store_true', default=False)
+    parser.add_argument('--config', type=str, default='docs\\MSANet\\config\\pascal\\pascal_split2_resnet101.yaml',
+                        help='config file')  # coco/coco_split0_resnet50.yaml
+    parser.add_argument('--opts', help='see config/ade20k/ade20k_pspnet50.yaml for all options', default=None,
+                        nargs=argparse.REMAINDER)
+    
+    args = parser.parse_args()
+
+    arg_dict = vars(args)
+
+    # Dataset initialization
+    FSSDataset.initialize(
+        img_size=400, datapath=arg_dict["datapath"], use_original_imgsize=arg_dict["use_original_imgsize"], length=arg_dict["test_size"])
+    dataloader_test = FSSDataset.build_dataloader(
+        benchmark=arg_dict["benchmark"], experiment='test', shot=arg_dict["nshot"])
+
+    if(arg_dict["model"] == "CNN"):
+        CNN_test(arg_dict, dataloader_test)
+
+    if(arg_dict["model"] == "HSNet"):
+        HSNet_test(arg_dict, dataloader_test)
+
+    if(arg_dict["model"] == "MSANet"):
+        MSANet_test(args, arg_dict, dataloader_test)
