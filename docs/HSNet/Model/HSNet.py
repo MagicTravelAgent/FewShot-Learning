@@ -72,7 +72,7 @@ class HypercorrSqueezeNetwork(nn.Module):
             features[idx] = features[idx] * mask
         return features
 
-    def predict_mask_nshot(self, batch, nshot):
+    def predict_mask_nshot(self, batch, nshot, confidence):
 
         # Perform multiple prediction given (nshot) number of different support sets
         logit_mask_agg = 0
@@ -92,8 +92,8 @@ class HypercorrSqueezeNetwork(nn.Module):
         max_vote = torch.stack([max_vote, torch.ones_like(max_vote).long()])
         max_vote = max_vote.max(dim=0)[0].view(bsz, 1, 1)
         pred_mask = logit_mask_agg.float() / max_vote
-        pred_mask[pred_mask < 0.8] = 0
-        pred_mask[pred_mask >= 0.8] = 1
+        pred_mask[pred_mask < confidence] = 0
+        pred_mask[pred_mask >= confidence] = 1
 
         return pred_mask
 

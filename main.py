@@ -74,7 +74,7 @@ def MSANet_test(args_args, args, dataloader_test):
     df = pd.DataFrame.from_dict(eval_list)
     df.to_csv("docs/output/MSA_top20.csv")
 
-def test_HSNet_loop(model, dataloader, nshot):
+def test_HSNet_loop(model, dataloader, nshot, confidence):
     r""" Test HSNet """
 
     # Freeze randomness during testing for reproducibility
@@ -126,7 +126,7 @@ def HSNet_test(args, dataloader_test):
 
     # Test HSNet
     with torch.no_grad():
-        eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"])
+        eval_list = test_HSNet_loop(model, dataloader_test, args["nshot"], args["confidence_level"])
     
     # eval_list saved for analysis
     df = pd.DataFrame.from_dict(eval_list)
